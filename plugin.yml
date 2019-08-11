@@ -1,0 +1,16 @@
+name: NganHangUI
+main: BlackPMFury\BankUI\Main
+api:
+ - 3.0.0
+ - 3.2.0
+version: 3.0
+load: POSTWORLD
+author: BlackPMFury
+ #Old_Author: Duy2Phong, Shin
+description: Add Bank to Plugin's Pocketmine
+website: https://github.com/BlackPMFury
+commands:
+ bank:
+  description: "Ngan Hang"
+  usage: /nganhang
+  default: true
