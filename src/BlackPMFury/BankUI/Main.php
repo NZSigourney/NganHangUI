@@ -31,6 +31,7 @@ class Main extends PluginBase implements Listener{
 		$this->nganhang = new Config($this->getDataFolder() ."nganhang.yml", Config::YAML, []);
 		$this->EconomyAPI = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI");
         $this->eco = EconomyAPI::getInstance();
+		$this->pp = $this->getServer()->getPluginManager()->getPlugin("PurePerms");
 	}
 	
 	public function taoNguoiDung($ten){
@@ -78,14 +79,39 @@ class Main extends PluginBase implements Listener{
 		$player = $ev->getPlayer();
 		$ten = $player->getName();
 		$tienhienco = $this->xemTien($ten);
+		$rank = $this->pp->getUserDataMgr()->getGroup($player);
 		$msg = "
 §a-==<§c•§a> §eTài Khoản Của Bạn <§c•§a>==-
 §aTài Khoản Dư:§e $tienhienco
+§aThuế:
+ §c+§a Kinh Doanh: §eCannot Loading Data
+ §c+§a Tài Khoản Vip: 10k (1 Lần Login)
 §cLưu Ý: Cứ 1 h Sẽ Dc paycheck (Tính Năng Đang Bảo trì)
 ";
 		foreach($this->getServer()->getOnlinePlayers() as $players){
 			$players->sendMessage($msg);
-			$this->taoNguoiDung($ten);
+			switch($rank){
+				case "vip1":
+				$reduceMoney = 10000;
+				break;
+				case "vip2":
+				$reduceMoney = 10000;
+				break;
+				case "vip3":
+				$reduceMoney = 10000;
+				break;
+				case "vip4":
+				$reduceMoney = 10000;
+				break;
+				case "vip5":
+				$reduceMoney = 9000;
+				break;
+				default:
+				$reduceMoney = 0;
+				break;
+			}
+			$this->eco->reduceMoney($ten, $reduceMoney);
+			$player->sendMessage($this->tag . "§c Đã Trừ Thuế Vip §e(10k/1 Lần Login)§c, Tài Khoản Dư Còn Lại $tienhienco");
 		}
 	}
 	
@@ -115,6 +141,9 @@ class Main extends PluginBase implements Listener{
 					case 3:
 					$this->chuyenTien($sender);
 					break;
+				}
+				if(!$this->kiemTra($ten)){
+					$this->taoNguoiDung($ten);
 				}
 			});
 			$form->setTitle($this->tag);
@@ -151,6 +180,9 @@ class Main extends PluginBase implements Listener{
 				$sender->sendPopup("§cKhông Đủ tiền để gửi!");
 				return true;
 			}
+			if($tien < 10000){
+				$sender->sendMessage("§cSố Tiền Không Được Nhỏ Hơn 10000!");
+			}
 		});
 		
 		$form->setTitle($this->tag);
@@ -169,10 +201,10 @@ class Main extends PluginBase implements Listener{
 				$this->truTien($ten, $tien);
 				$this->eco->addMoney($ten, $tien);
 				$tien = (string)$tien;
-				$sender->sendMessage("§fBạn đã lấy ra §a$tien §ftừ ngân hàng !");
+				$sender->sendPopup($this->tag . "§fBạn đã lấy ra §a$tien §ftừ ngân hàng !");
 				return true;
 			}else{
-				$sender->sendMessage("§Số tiền bạn rút nhiều hơn số tiền bạn hiện có !");
+				$sender->sendMessage("§cSố tiền bạn rút nhiều hơn số tiền bạn hiện có !");
 			}
 		});
 		$form->setTitle($this->tag);
@@ -210,7 +242,7 @@ class Main extends PluginBase implements Listener{
 							}
 						}
 						if(isset($nguoinhan)){
-							$nguoinhan->sendMessage("$ten §fđã chuyển cho bạn §a$t");
+							$nguoinhan->sendMessage("$ten §fđã chuyển cho bạn §a$tien");
 							return true;
 						}
 						$sender->sendMessage("$data[1] §cHiện Không Trực tuyến!");
