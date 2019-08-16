@@ -59,12 +59,12 @@ class Main extends PluginBase implements Listener{
 	}
 	
 	public function xemTien($ten){
-    $ten = strtolower($ten);
-	if($this->kiemTra($ten)){
-		$tienhienco = $this->nganhang->get($ten);
-		return $tienhienco;
-	}
-	return false;
+		$ten = strtolower($ten);
+		if($this->kiemTra($ten)){
+			$tienhienco = $this->nganhang->get($ten);
+			return $tienhienco;
+		}
+		return false;
 	}
 	
 	public function kiemTra($ten){
@@ -86,32 +86,20 @@ class Main extends PluginBase implements Listener{
 §aThuế:
  §c+§a Kinh Doanh: §eCannot Loading Data
  §c+§a Tài Khoản Vip: 10k (1 Lần Login)
-§cLưu Ý: Cứ 1 h Sẽ Dc paycheck (Tính Năng Đang Bảo trì)
-";
+§cLưu Ý: Cứ 1 h Sẽ Dc paycheck (Tính Năng Đang Bảo trì)";
 		foreach($this->getServer()->getOnlinePlayers() as $players){
 			$players->sendMessage($msg);
-			switch($rank){
-				case "vip1":
-				$reduceMoney = 10000;
-				break;
-				case "vip2":
-				$reduceMoney = 10000;
-				break;
-				case "vip3":
-				$reduceMoney = 10000;
-				break;
-				case "vip4":
-				$reduceMoney = 10000;
-				break;
-				case "vip5":
-				$reduceMoney = 9000;
-				break;
-				default:
-				$reduceMoney = 0;
-				break;
+			if($rank == "vip1" || $rank == "vip2" || $rank == "vip3" || $rank == "vip4"){
+				$this->eco->reduceMoney($ten, 10000);
+				$player->sendMessage($this->tag . "§c Đã Trừ Thuế Vip §e(10k/1 Lần Login)§c, Tài Khoản Dư Còn Lại $tienhienco");
+			}elseif($rank == "vip5"){
+				$this->eco->reduceMoney($ten, 5000);
+				$players->sendMessage($this->tag . "§c Đã Trừ Thuế Vip-V §e(5k/1 Lần Login)§c, Tài Khoản Dư Còn Lại $tienhienco");
+				return true;
 			}
-			$this->eco->reduceMoney($ten, $reduceMoney);
-			$player->sendMessage($this->tag . "§c Đã Trừ Thuế Vip §e(10k/1 Lần Login)§c, Tài Khoản Dư Còn Lại $tienhienco");
+		}
+		if(!$this->kiemTra($ten)){
+			$this->taoNguoiDung($ten);
 		}
 	}
 	
@@ -141,9 +129,6 @@ class Main extends PluginBase implements Listener{
 					case 3:
 					$this->chuyenTien($sender);
 					break;
-				}
-				if(!$this->kiemTra($ten)){
-					$this->taoNguoiDung($ten);
 				}
 			});
 			$form->setTitle($this->tag);
