@@ -26,7 +26,9 @@ class CountdownTask extends Task{
                 $this->plugin->tasks[$this->player->getId()]->getHandler()->cancel();
                 $this->player->sendPopup($this->plugin->tag . "§a Bạn nhận được 5000 SAD trong Ngân Hàng");
                 $this->player->sendMessage($this->plugin->tag . "§c Checked Nigga!");
+                $this->player->sendMessage($this->plugin->tag . "§l§a Bạn Đã Online§e ".$this->plugin->seeTax($name)."§a Giờ!");
                 $this->plugin->congTien($name, 5000);
+                $this->plugin->addTaxUser($name, 1);
             }
         }
     }

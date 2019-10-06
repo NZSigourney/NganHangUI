@@ -47,15 +47,35 @@ class Main extends PluginBase implements Listener{
         $this->tasks[] = $name;
     }
 
-    public function createTaxUser($name){
-	    $this->tax->set($name, 0);
+    public function createTaxUser($ten){
+	    $this->tax->set($ten, 0);
 	    $this->tax->save();
     }
 
-    public function addTaxUser($name, $tax){
-	    $currentTax = $this->tax->get($name);
+    public function addTaxUser($ten, $tax){
+	    $currentTax = $this->tax->get($ten);
 	    $this->tax->set($ten, $currentTax + $tax);
 	    $this->tax->save();
+    }
+
+    public function changeTax($ten){
+	    $this->tax($ten, $tien);
+	    $this->tax->save();
+    }
+
+    public function seeTax($ten){
+	    if($this->checkTax){
+	        $currentTax = $this->tax->get($ten);
+	        return $currentTax;
+        }
+	    return false;
+    }
+
+    public function checkTax($ten){
+	    if($this->tax->exists($ten)){
+	        return true;
+        }
+	    return false;
     }
 	
 	public function taoNguoiDung($ten){
@@ -118,6 +138,9 @@ class Main extends PluginBase implements Listener{
 		foreach($this->getServer()->getOnlinePlayers() as $ten){
 		    if(!$this->kiemTra($ten)){
 		        $this->taoNguoiDung($ten);
+            }
+		    if(!$this->checkTax($ten)){
+		        $this->createTaxUser($ten);
             }
 		    return true;
         }
