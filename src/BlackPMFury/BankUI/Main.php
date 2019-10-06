@@ -18,9 +18,13 @@ use onebone\economyapi\EconomyAPI;
 use jojoe7777\FormAPI;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\Listener;
+use BlackPMFury\BankUI\Task\CountdownTask;
 
 class Main extends PluginBase implements Listener{
 	public $tag = "§a>§c•§a< §aBankUI §a>§c•§a<";
+
+    public $task;
+    public $tasks = [];
 	
 	public function onEnable(){
 		$this->getServer()->getLogger()->info($this->tag . "§a Enable Plugin");
@@ -32,11 +36,31 @@ class Main extends PluginBase implements Listener{
 		$this->EconomyAPI = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI");
         $this->eco = EconomyAPI::getInstance();
 		$this->pp = $this->getServer()->getPluginManager()->getPlugin("PurePerms");
+		$this->tax = new Config($this->getDataFolder() . "PayCheck.yml", Config::YAML, []);
 	}
+
+    public function createTask($sender){
+        $name = $sender->getName();
+        $task = new CountdownTask($this, $sender);
+        $this->getScheduler()->scheduleRepeatingTask($task, 86400);
+        $this->tasks[$sender->getId()] = $task;
+        $this->tasks[] = $name;
+    }
+
+    public function createTaxUser($name){
+	    $this->tax->set($name, 0);
+	    $this->tax->save();
+    }
+
+    public function addTaxUser($name, $tax){
+	    $currentTax = $this->tax->get($name);
+	    $this->tax->set($ten, $currentTax + $tax);
+	    $this->tax->save();
+    }
 	
 	public function taoNguoiDung($ten){
 		$ten = strtolower($ten);
-		$this->nganhang->set($ten, 0);
+		$this->nganhang->set(strtolower($ten), 0);
 		$this->nganhang->save();
 	}
 	
@@ -87,20 +111,16 @@ class Main extends PluginBase implements Listener{
  §c+§a Kinh Doanh: §eCannot Loading Data
  §c+§a Tài Khoản Vip: 10k (1 Lần Login)
 §cLưu Ý: Cứ 1 h Sẽ Dc paycheck (Tính Năng Đang Bảo trì)";
-		foreach($this->getServer()->getOnlinePlayers() as $players){
-			$players->sendMessage($msg);
-			if($rank == "vip1" || $rank == "vip2" || $rank == "vip3" || $rank == "vip4"){
-				$this->eco->reduceMoney($ten, 10000);
-				$player->sendMessage($this->tag . "§c Đã Trừ Thuế Vip §e(10k/1 Lần Login)§c, Tài Khoản Dư Còn Lại $tienhienco");
-			}elseif($rank == "vip5"){
-				$this->eco->reduceMoney($ten, 5000);
-				$players->sendMessage($this->tag . "§c Đã Trừ Thuế Vip-V §e(5k/1 Lần Login)§c, Tài Khoản Dư Còn Lại $tienhienco");
-				return true;
-			}
-		}
-		if(!$this->kiemTra($ten)){
-			$this->taoNguoiDung($ten);
-		}
+		$player->sendMessage($msg);
+		$this->tax->set($player->getName(), "Checked");
+		$this->tax->save();
+		$this->createTask($player);
+		foreach($this->getServer()->getOnlinePlayers() as $ten){
+		    if(!$this->kiemTra($ten)){
+		        $this->taoNguoiDung($ten);
+            }
+		    return true;
+        }
 	}
 	
 	public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args): bool{
@@ -180,7 +200,7 @@ class Main extends PluginBase implements Listener{
 		$api = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
 		$form = $api->createCustomForm(Function (Player $sender, $data){
 			$tien = $data[0];
-			$ten = strtolower($sender->getName());
+			$ten = $sender->getName();
 			$money = $this->EconomyAPI->myMoney($ten);
 			if($this->xemTien($ten) >= $tien){
 				$this->truTien($ten, $tien);
@@ -213,7 +233,7 @@ class Main extends PluginBase implements Listener{
 	public function chuyenTien($sender){
 		$api = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
 		$form = $api->createCustomForm(Function (Player $sender, $data){
-			$ten = strtolower($sender->getName());
+			$ten = $sender->getName();
 			$tien = $data[2];
 			if($this->kiemTra($ten)){
 				if($this->xemTien($ten) >= strtolower($tien)){
