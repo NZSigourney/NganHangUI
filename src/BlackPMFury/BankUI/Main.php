@@ -139,10 +139,10 @@ class Main extends PluginBase implements Listener{
 		    if(!$this->kiemTra($ten)){
 		        $this->taoNguoiDung($ten);
             }
-		    if(!$this->checkTax($ten)){
-		        $this->createTaxUser($ten);
-            }
 		    return true;
+        }
+        if(!$this->checkTax($ten)){
+            $this->createTaxUser($ten);
         }
 	}
 	
