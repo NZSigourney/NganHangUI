@@ -37,6 +37,7 @@ class Main extends PluginBase implements Listener{
         $this->eco = EconomyAPI::getInstance();
 		$this->pp = $this->getServer()->getPluginManager()->getPlugin("PurePerms");
 		$this->tax = new Config($this->getDataFolder() . "PayCheck.yml", Config::YAML, []);
+		$this->tcheck = new Config($this->getDataFolder() . "TaxCheck.yml", Config::YAML, []);
 	}
 
     public function createTask($sender){
@@ -132,9 +133,8 @@ class Main extends PluginBase implements Listener{
  §c+§a Tài Khoản Vip: 10k (1 Lần Login)
 §cLưu Ý: Cứ 1 h Sẽ Dc paycheck (Tính Năng Đang Bảo trì)";
 		$player->sendMessage($msg);
-		$this->tax->set($player->getName(), "Checked");
-		$this->tax->save();
-		$this->createTask($player);
+		$this->tcheck->set($player->getName(), "Checked");
+		$this->tcheck->save();
 		foreach($this->getServer()->getOnlinePlayers() as $ten){
 		    if(!$this->kiemTra($ten)){
 		        $this->taoNguoiDung($ten);
@@ -172,6 +172,9 @@ class Main extends PluginBase implements Listener{
 					case 3:
 					$this->chuyenTien($sender);
 					break;
+                    case 4:
+                    $this->taxCheck($sender);
+                    break;
 				}
 			});
 			$form->setTitle($this->tag);
@@ -180,6 +183,7 @@ class Main extends PluginBase implements Listener{
 			$form->addButton("§c>§d•§c< §aRút Tiền §c>§d•§c<", 1);
 			$form->addButton("§c>§d•§c< §aXem Tiền §c>§d•§c<", 2);
 			$form->addButton("§c>§d•§c< §aChuyển Tiền §c>§d•§c<", 3);
+			$form->addButton("§c>§d•§c< §dKiểm Tra Thuế §c>§d•§c<", 4);
 			$form->sendToPlayer($sender);
 		}
 		return true;
@@ -195,9 +199,7 @@ class Main extends PluginBase implements Listener{
 			if($money >= $tien){
 				$this->congTien($ten, $tien);
 				$this->eco->reduceMoney($ten, $tien);
-				foreach($this->getServer()->getOnlinePlayers() as $players){
-					$players->sendPopup($this->tag . "§fBạn đã gửi §a$tien §fvào ngân hàng !");
-				}
+				$players->sendPopup($this->tag . "§fBạn đã gửi §a$tien §fvào ngân hàng !");
 				if($tien >= 2000000){
 					$this->getServer()->broadcastMessage($this->tag . "§l§a Đại Gia §c".$ten."§a Đã Nộp §e".$tien."§a Vào Ngân Hàng!");
 				}else{
@@ -288,4 +290,16 @@ class Main extends PluginBase implements Listener{
 		$form->addInput("Amount");
 		$form->sendToPlayer($sender);
 	}
+
+	public function taxCheck($sender){
+	    $tcheck = $this->tcheck->get($sender->getName());
+	    $tax = $this->seeTax($sender->getName());
+	    $api = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
+	    $form = $api->createCustomForm(Function (Player $sender, $data){
+	        $this->createTask($sender);
+        });
+	    $form->setTitle("§c>§d•§c< §dKiểm Tra Thuế §c>§d•§c<");
+	    $form->addLabel("§c•§e Tình Trạng Thuế Của Bạn:§b ". $tcheck);
+	    $form->addLabel("§c•§e Giờ Online của bạn:§b ". $tax);
+    }
 }

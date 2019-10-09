@@ -28,7 +28,9 @@ class CountdownTask extends Task{
                 $this->player->sendMessage($this->plugin->tag . "§c Checked Nigga!");
                 $this->player->sendMessage($this->plugin->tag . "§l§a Bạn Đã Online§e ".$this->plugin->seeTax($name)."§a Giờ!");
                 $this->plugin->congTien($name, 5000);
-                $this->plugin->addTaxUser($name, 1);
+                if($this->player->isOnline()){
+                    $this->plugin->addTaxUser($name, 1);
+                }
             }
         }
     }
