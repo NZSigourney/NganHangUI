@@ -3,7 +3,7 @@ main: BlackPMFury\BankUI\Main
 api:
  - 3.0.0
  - 3.2.0
-version: 5.0.0-ALPHA
+version: 6.0
 load: POSTWORLD
 author: BlackPMFury
  #Old_Author: Duy2Phong, Shin

@@ -65,7 +65,7 @@ class Main extends PluginBase implements Listener{
     }
 
     public function seeTax($ten){
-	    if($this->checkTax){
+	    if($this->checkTax($ten)){
 	        $currentTax = $this->tax->get($ten);
 	        return $currentTax;
         }
