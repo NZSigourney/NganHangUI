@@ -21,23 +21,45 @@ use pocketmine\event\Listener;
 use BlackPMFury\BankUI\Task\CountdownTask;
 
 class Main extends PluginBase implements Listener{
+	
 	public $tag = "§a>§c•§a< §aBankUI §a>§c•§a<";
 
     public $task;
+	
     public $tasks = [];
 	
-	public function onEnable(){
-		$this->getServer()->getLogger()->info($this->tag . "§a Enable Plugin");
-		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		if(!is_dir($this->getDataFolder())){
-			mkdir($this->getDataFolder());
-		}
-		$this->nganhang = new Config($this->getDataFolder() ."nganhang.yml", Config::YAML, []);
-		$this->EconomyAPI = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI");
+	public $enable = false; // This Enable for plugin return 1 / 0
+	
+	public function onEnable(){				
+		
         $this->eco = EconomyAPI::getInstance();
 		$this->pp = $this->getServer()->getPluginManager()->getPlugin("PurePerms");
-		$this->tax = new Config($this->getDataFolder() . "PayCheck.yml", Config::YAML, []);
-		$this->tcheck = new Config($this->getDataFolder() . "TaxCheck.yml", Config::YAML, []);
+		if($this->pp === null){
+			$this->enable = false;
+			$this->getServer()->getLogger()->info($this->tag . "§c Bạn chắc rằng bạn đã cài plugin PurePerms từ pogit chưa ?");
+			$this->getServer()->shutdown();
+			return;
+		}
+		
+		$this->EconomyAPI = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI");
+        if($this->EconomyAPI === null){
+			$this->enable = false;
+			$this->getServer()->getLogger()->info($this->tag . "§c Bạn chắc rằng bạn đã cài plugin EconomyAPI từ pogit chưa ?");
+			$this->getServer()->shutdown();
+			return;
+		}
+		
+        if($this->enable = true){
+			$this->getServer()->getLogger()->info($this->tag . "§aPlugin is Enable!");
+		    $this->getServer()->getPluginManager()->registerEvents($this, $this);
+		    if(!is_dir($this->getDataFolder())){
+			    mkdir($this->getDataFolder());
+			}
+		
+		    $this->nganhang = new Config($this->getDataFolder() ."nganhang.yml", Config::YAML, []);	
+            $this->tax = new Config($this->getDataFolder() . "PayCheck.yml", Config::YAML, []);
+		    $this->tcheck = new Config($this->getDataFolder() . "TaxCheck.yml", Config::YAML, []);
+		}			
 	}
 
     public function createTask($sender){
@@ -199,7 +221,7 @@ class Main extends PluginBase implements Listener{
 			if($money >= $tien){
 				$this->congTien($ten, $tien);
 				$this->eco->reduceMoney($ten, $tien);
-				$players->sendPopup($this->tag . "§fBạn đã gửi §a$tien §fvào ngân hàng !");
+				$sender->sendPopup($this->tag . "§fBạn đã gửi §a$tien §fvào ngân hàng !");
 				if($tien >= 2000000){
 					$this->getServer()->broadcastMessage($this->tag . "§l§a Đại Gia §c".$ten."§a Đã Nộp §e".$tien."§a Vào Ngân Hàng!");
 				}else{
